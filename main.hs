@@ -1,6 +1,5 @@
 main :: IO ()
 main = do
-        --let ts = tokens
         let allTokens = move tokens Red 3
         putStrLn "All tokens:"
         print allTokens
