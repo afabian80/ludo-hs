@@ -12,7 +12,7 @@ getPosition :: Token -> Position
 getPosition (Token _ p) = p
 
 tokens :: [Token]
-tokens = map (\c-> Token c 0) [Red, Green, Blue, Yellow]
+tokens = [Token c 0 | c <- concatMap (replicate 4) [Red, Green, Blue, Yellow]]
 
 moveSingle :: Token -> Int -> Token
 moveSingle (Token c p) n = Token c (p + n)
