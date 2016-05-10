@@ -1,5 +1,19 @@
 main :: IO ()
-main = print "Hello"
+main = do
+        --let ts = tokens
+        let allTokens = move tokens Red 3
+        putStrLn "All tokens:"
+        print allTokens
+        putStrLn ""
+
+        let tokensAtHome = tokensOnField allTokens 0
+        putStrLn "Tokens at home:"
+        print tokensAtHome
+        putStrLn ""
+
+        let redEnemies = enemies Red allTokens
+        putStrLn "Enemies of Red:"
+        print redEnemies
 
 data Color = Red | Green | Blue | Yellow deriving (Show, Eq)
 type Position = Int
