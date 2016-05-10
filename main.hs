@@ -30,7 +30,7 @@ isEnemy :: Color -> Token -> Bool
 isEnemy c1 (Token c2 _) = c1 /= c2
 
 enemies :: Color -> [Token] -> [Token]
-enemies c ts = filter (isEnemy c) ts
+enemies c = filter (isEnemy c)
 
 -- isHitting :: [Token] -> Color -> Int -> Bool
 -- isHitting ts c n =
