@@ -1,49 +1,53 @@
+data Player = Red | Green | Blue | Yellow deriving (Show, Eq, Enum)
+type Position = Int
+data Piece = Piece Player Position deriving (Show)
+
+randomNumbers :: [Int]
+randomNumbers = [1, 6, 5, 1, 1, 1, 5, 1, 6, 5, 2, 2, 2, 5, 2, 5, 4, 4, 2, 1, 4, 3, 5, 4, 6, 2, 2, 2, 2, 4, 4, 5, 6, 1, 5, 2, 6, 1, 6, 5, 2, 5, 6, 6, 5, 6, 2, 2, 6, 2, 3, 2, 2, 1, 1, 6, 5, 5, 1, 6, 4, 6, 6, 5, 6, 5, 2, 2, 4, 6, 3, 3, 5, 6, 3, 4, 1, 4, 1, 1, 6, 3, 3, 1, 6, 1, 4, 2, 4, 5, 6, 2, 4, 5, 6, 6, 4, 3, 4, 6]
+
+pieces :: [Piece]
+pieces = [Piece player 0 | player <- concatMap (replicate 4) [Red, Green, Blue, Yellow]]
+
 main :: IO ()
 main = do
-        let allTokens = move tokens Red 3
-        putStrLn "All tokens:"
-        print allTokens
-        putStrLn ""
+        print pieces
+        let player = Red
+        let (dice, nextPlayer, randoms) = roll player randomNumbers
+        --let pieceToMove = chooseBestPieceFor dice nextPlayer pieces
+        putStrLn "done"
 
-        let tokensAtHome = tokensOnField allTokens 0
-        putStrLn "Tokens at home:"
-        print tokensAtHome
-        putStrLn ""
+roll :: Player -> [Int] -> (Int, Player, [Int])
+roll player randoms = (dice, nextPlayerFor dice player, tail randoms)
+        where dice = head randoms
 
-        let redEnemies = enemies Red allTokens
-        putStrLn "Enemies of Red:"
-        print redEnemies
+nextPlayerFor :: Int -> Player -> Player
+nextPlayerFor 6 player = player
+nextPlayerFor _ Yellow = Red
+nextPlayerFor _ player = succ player
 
-data Color = Red | Green | Blue | Yellow deriving (Show, Eq)
-type Position = Int
-data Token = Token Color Position deriving (Show)
+getPlayer :: Piece -> Player
+getPlayer (Piece player _) = player
 
-getColor :: Token -> Color
-getColor (Token c _) = c
+getPosition :: Piece -> Position
+getPosition (Piece _ position) = position
 
-getPosition :: Token -> Position
-getPosition (Token _ p) = p
+moveSingle :: Piece -> Int -> Piece
+moveSingle (Piece player position) step = Piece player (position + step)
 
-tokens :: [Token]
-tokens = [Token c 0 | c <- concatMap (replicate 4) [Red, Green, Blue, Yellow]]
+-- move :: [Piece] -> Player -> Int -> [Piece]
+-- move [] _ _ = []
+-- move (p:ps) player step
+--         | getPlayer p == player = moveSingle p step : move ps player step
+--         | otherwise = p : move ps player step
 
-moveSingle :: Token -> Int -> Token
-moveSingle (Token c p) n = Token c (p + n)
+piecesOnField :: [Piece] -> Int -> [Piece]
+piecesOnField ps n = filter (\piece -> getPosition piece == n) ps
 
-move :: [Token] -> Color -> Int -> [Token]
-move [] _ _ = []
-move (x:xs) c n
-        | getColor x == c = moveSingle x n : move xs c n
-        | otherwise = x : move xs c n
+isEnemy :: Player -> Piece -> Bool
+isEnemy player1 (Piece player2 _) = player1 /= player2
 
-tokensOnField :: [Token] -> Int -> [Token]
-tokensOnField xs n = filter (\t -> getPosition t == n) xs
+enemies :: Player -> [Piece] -> [Piece]
+enemies player = filter (isEnemy player)
 
-isEnemy :: Color -> Token -> Bool
-isEnemy c1 (Token c2 _) = c1 /= c2
-
-enemies :: Color -> [Token] -> [Token]
-enemies c = filter (isEnemy c)
-
--- isHitting :: [Token] -> Color -> Int -> Bool
--- isHitting ts c n =
+-- collide :: [Piece] -> Player -> Int -> Bool
+-- collide ts c n =
