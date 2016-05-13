@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-unused-binds #-}
+
 data Player = Red | Green | Blue | Yellow deriving (Show, Eq, Enum)
 type Position = Int
 data Piece = Piece Player Position deriving (Show)
