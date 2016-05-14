@@ -1,9 +1,24 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
 {-# ANN module "HLint: ignore Use concatMap" #-}
 
-data Player = Red | Green | Blue | Yellow deriving (Show, Eq, Enum)
+data Player = Red | Green | Blue | Yellow deriving (Eq, Enum)
 type Position = Int
-data Piece = Piece Player Position deriving (Show)
+data Piece = Piece Player Position
+
+instance Show Player where
+        show Red    = "R"
+        show Green  = "G"
+        show Blue   = "B"
+        show Yellow = "Y"
+
+instance Show Piece where
+        show (Piece player pos) = show player ++ "-" ++ show pos
+
+instance Eq Piece where
+        (Piece _ posa) == (Piece _ posb) = posa == posb
+
+instance Ord Piece where
+        (Piece _ posa) `compare` (Piece _ posb) = posa `compare` posb
 
 getPlayer :: Piece -> Player
 getPlayer (Piece player _) = player
@@ -19,11 +34,36 @@ pieces = [Piece player 0 | player <- concatMap (replicate 4) [Red, Green, Blue, 
 
 main :: IO ()
 main = do
-        print pieces
+        reportPieces pieces
         let player = Red
-        let (number, nextPlayer, randoms) = roll player randomNumbers
-        --let pieceToMove = chooseBestPieceFor number nextPlayer pieces
+        reportPlayer player
+        let (dice, nextPlayer, randoms) = roll player randomNumbers
+        reportDice dice
+        --let pieceToMove = chooseBestPieceFor dice player pieces
+        let pieceToMove = farthestPiece player pieces
+        reportMove pieceToMove dice nextPlayer
+        --let steppedPieces = move pieceToMove dice pieces
         putStrLn "done"
+
+reportDice :: Int -> IO ()
+reportDice dice =
+        putStrLn $ "Dice is " ++ show dice
+
+reportPlayer :: Player -> IO ()
+reportPlayer player =
+        putStrLn $ "Current player is " ++ show player
+
+reportPieces :: [Piece] -> IO ()
+reportPieces pcs =
+        putStrLn $ "Board is " ++ show pcs
+
+reportMove :: Piece -> Int -> Player -> IO ()
+reportMove piece dice nextPlayer =
+        putStrLn $ show piece ++
+        " is about to move " ++
+        show dice ++ " steps, " ++
+        "next player is " ++
+        show nextPlayer
 
 roll :: Player -> [Int] -> (Int, Player, [Int])
 roll player randoms = (number, nextPlayerFor number player, tail randoms)
@@ -33,6 +73,17 @@ nextPlayerFor :: Int -> Player -> Player
 nextPlayerFor 6 player = player
 nextPlayerFor _ Yellow = Red
 nextPlayerFor _ player = succ player
+
+-- chooseBestPieceFor :: Int -> Player -> [Piece] -> Piece
+-- chooseBestPieceFor dice player ps = farthestPiece player ps
+
+farthestPiece :: Player -> [Piece] -> Piece
+farthestPiece player ps = farthest ownPieces
+        where
+                ownPieces = filter (not . isEnemy player) ps
+
+farthest :: [Piece] -> Piece
+farthest = maximum
 
 moveSingle :: Piece -> Int -> Piece
 moveSingle (Piece player position) step = Piece player (position + step)
