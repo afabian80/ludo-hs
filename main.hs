@@ -1,5 +1,4 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
-{-# ANN module "HLint: ignore Use concatMap" #-}
 
 data Player = Red | Green | Blue | Yellow deriving (Eq, Enum)
 type Position = Int
@@ -15,7 +14,7 @@ instance Show Piece where
         show (Piece player pos) = show player ++ "-" ++ show pos
 
 instance Eq Piece where
-        (Piece _ posa) == (Piece _ posb) = posa == posb
+        (Piece pla posa) == (Piece plb posb) = pla == plb &&  posa == posb
 
 instance Ord Piece where
         (Piece _ posa) `compare` (Piece _ posb) = posa `compare` posb
@@ -42,8 +41,14 @@ main = do
         --let pieceToMove = chooseBestPieceFor dice player pieces
         let pieceToMove = farthestPiece player pieces
         reportMove pieceToMove dice nextPlayer
-        --let steppedPieces = move pieceToMove dice pieces
+        let steppedPieces = move pieceToMove dice False pieces
         putStrLn "done"
+
+move :: Piece -> Int -> Bool -> [Piece] -> [Piece]
+move _ _ _ [] = []
+move piece step hasMoved (p:ps)
+        | p == piece && not hasMoved = moveSingle p step : move piece step True ps
+        | otherwise = p : move piece step hasMoved ps
 
 reportDice :: Int -> IO ()
 reportDice dice =
