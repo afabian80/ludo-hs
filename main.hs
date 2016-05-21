@@ -1,26 +1,26 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
 
-data Player = Red | Green | Blue | Yellow deriving (Eq, Enum)
+data Color = Red | Green | Blue | Yellow deriving (Eq, Enum)
 type Position = Int
-data Piece = Piece Player Position
+data Piece = Piece Color Position
 
-instance Show Player where
+instance Show Color where
         show Red    = "R"
         show Green  = "G"
         show Blue   = "B"
         show Yellow = "Y"
 
 instance Show Piece where
-        show (Piece player pos) = show player ++ "-" ++ show pos
+        show (Piece color pos) = show color ++ "-" ++ show pos
 
 instance Eq Piece where
-        (Piece pla posa) == (Piece plb posb) = pla == plb &&  posa == posb
+        (Piece ca posa) == (Piece cb posb) = ca == cb &&  posa == posb
 
 instance Ord Piece where
         (Piece _ posa) `compare` (Piece _ posb) = posa `compare` posb
 
-getPlayer :: Piece -> Player
-getPlayer (Piece player _) = player
+getColor :: Piece -> Color
+getColor (Piece color _) = color
 
 getPosition :: Piece -> Position
 getPosition (Piece _ position) = position
@@ -29,18 +29,18 @@ randomNumbers :: [Int]
 randomNumbers = [1, 6, 5, 1, 1, 1, 5, 1, 6, 5, 2, 2, 2, 5, 2, 5, 4, 4, 2, 1, 4, 3, 5, 4, 6, 2, 2, 2, 2, 4, 4, 5, 6, 1, 5, 2, 6, 1, 6, 5, 2, 5, 6, 6, 5, 6, 2, 2, 6, 2, 3, 2, 2, 1, 1, 6, 5, 5, 1, 6, 4, 6, 6, 5, 6, 5, 2, 2, 4, 6, 3, 3, 5, 6, 3, 4, 1, 4, 1, 1, 6, 3, 3, 1, 6, 1, 4, 2, 4, 5, 6, 2, 4, 5, 6, 6, 4, 3, 4, 6]
 
 pieces :: [Piece]
-pieces = [Piece player 0 | player <- concatMap (replicate 4) [Red, Green, Blue, Yellow]]
+pieces = [Piece color 0 | color <- concatMap (replicate 4) [Red, Green, Blue, Yellow]]
 
 main :: IO ()
 main = do
         reportPieces pieces
-        let player = Red
-        reportPlayer player
-        let (dice, nextPlayer, randoms) = roll player randomNumbers
+        let color = Red
+        reportColor color
+        let (dice, nextColor, randoms) = roll color randomNumbers
         reportDice dice
         --let pieceToMove = chooseBestPieceFor dice player pieces
-        let pieceToMove = farthestPiece player pieces
-        reportMove pieceToMove dice nextPlayer
+        let pieceToMove = farthestPiece color pieces
+        reportMove pieceToMove dice nextColor
         let steppedPieces = move pieceToMove dice False pieces
         putStrLn "done"
 
@@ -54,48 +54,48 @@ reportDice :: Int -> IO ()
 reportDice dice =
         putStrLn $ "Dice is " ++ show dice
 
-reportPlayer :: Player -> IO ()
-reportPlayer player =
-        putStrLn $ "Current player is " ++ show player
+reportColor :: Color -> IO ()
+reportColor color =
+        putStrLn $ "Current color is " ++ show color
 
 reportPieces :: [Piece] -> IO ()
 reportPieces pcs =
         putStrLn $ "Board is " ++ show pcs
 
-reportMove :: Piece -> Int -> Player -> IO ()
-reportMove piece dice nextPlayer =
+reportMove :: Piece -> Int -> Color -> IO ()
+reportMove piece dice nextColor =
         putStrLn $ show piece ++
         " is about to move " ++
         show dice ++ " steps, " ++
-        "next player is " ++
-        show nextPlayer
+        "next color is " ++
+        show nextColor
 
-roll :: Player -> [Int] -> (Int, Player, [Int])
-roll player randoms = (number, nextPlayerFor number player, tail randoms)
+roll :: Color -> [Int] -> (Int, Color, [Int])
+roll color randoms = (number, nextColorFor number color, tail randoms)
         where number = head randoms
 
-nextPlayerFor :: Int -> Player -> Player
-nextPlayerFor 6 player = player
-nextPlayerFor _ Yellow = Red
-nextPlayerFor _ player = succ player
+nextColorFor :: Int -> Color -> Color
+nextColorFor 6 color = color
+nextColorFor _ Yellow = Red
+nextColorFor _ color = succ color
 
 -- chooseBestPieceFor :: Int -> Player -> [Piece] -> Piece
 -- chooseBestPieceFor dice player ps = farthestPiece player ps
 
-farthestPiece :: Player -> [Piece] -> Piece
-farthestPiece player ps = farthest ownPieces
+farthestPiece :: Color -> [Piece] -> Piece
+farthestPiece color ps = farthest ownPieces
         where
-                ownPieces = filter (not . isEnemy player) ps
+                ownPieces = filter (not . isEnemy color) ps
 
 farthest :: [Piece] -> Piece
 farthest = maximum
 
 moveSingle :: Piece -> Int -> Piece
-moveSingle (Piece player position) step
-        | position == 0 = Piece player home
-        | otherwise = Piece player (position + step)
+moveSingle (Piece color position) step
+        | position == 0 = Piece color home
+        | otherwise = Piece color (position + step)
         where
-                home = case player of
+                home = case color of
                         Red    -> 1
                         Green  -> 40
                         Blue   -> 14
@@ -110,11 +110,11 @@ moveSingle (Piece player position) step
 piecesOnField :: [Piece] -> Int -> [Piece]
 piecesOnField ps n = filter (\piece -> getPosition piece == n) ps
 
-isEnemy :: Player -> Piece -> Bool
-isEnemy player1 (Piece player2 _) = player1 /= player2
+isEnemy :: Color -> Piece -> Bool
+isEnemy c1 (Piece c2 _) = c1 /= c2
 
-enemies :: Player -> [Piece] -> [Piece]
-enemies player = filter (isEnemy player)
+enemies :: Color -> [Piece] -> [Piece]
+enemies color = filter (isEnemy color)
 
 -- collide :: [Piece] -> Player -> Int -> Bool
 -- collide ts c n =
