@@ -1,14 +1,9 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds #-}
 
-data Color = Red | Green | Blue | Yellow deriving (Eq, Enum)
+import Color
+
 type Position = Int
 data Token = Token Color Position
-
-instance Show Color where
-        show Red    = "R"
-        show Green  = "G"
-        show Blue   = "B"
-        show Yellow = "Y"
 
 instance Show Token where
         show (Token color pos) = show color ++ "-" ++ show pos
@@ -54,10 +49,6 @@ reportDice :: Int -> IO ()
 reportDice dice =
         putStrLn $ "Dice is " ++ show dice
 
-reportColor :: Color -> IO ()
-reportColor color =
-        putStrLn $ "Current color is " ++ show color
-
 reportTokens :: [Token] -> IO ()
 reportTokens pcs =
         putStrLn $ "Board is " ++ show pcs
@@ -73,11 +64,6 @@ reportMove piece dice nextColor =
 roll :: Color -> [Int] -> (Int, Color, [Int])
 roll color randoms = (number, nextColorFor number color, tail randoms)
         where number = head randoms
-
-nextColorFor :: Int -> Color -> Color
-nextColorFor 6 color = color
-nextColorFor _ Yellow = Red
-nextColorFor _ color = succ color
 
 -- chooseBestPieceFor :: Int -> Player -> [Piece] -> Piece
 -- chooseBestPieceFor dice player ps = farthestPiece player ps
