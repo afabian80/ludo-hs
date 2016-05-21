@@ -91,7 +91,15 @@ farthest :: [Piece] -> Piece
 farthest = maximum
 
 moveSingle :: Piece -> Int -> Piece
-moveSingle (Piece player position) step = Piece player (position + step)
+moveSingle (Piece player position) step
+        | position == 0 = Piece player home
+        | otherwise = Piece player (position + step)
+        where
+                home = case player of
+                        Red    -> 1
+                        Green  -> 40
+                        Blue   -> 14
+                        Yellow -> 27
 
 -- move :: [Piece] -> Player -> Int -> [Piece]
 -- move [] _ _ = []
